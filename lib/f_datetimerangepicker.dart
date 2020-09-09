@@ -14,6 +14,8 @@ class DateTimeRangePicker {
   final endText;
   final doneText;
   final cancelText;
+  final int initialIndex;
+  final TextStyle labelStyle;
   final bool use24hFormat;
   final DateTimeRangePickerMode mode;
 
@@ -30,8 +32,10 @@ class DateTimeRangePicker {
   DateTimeRangePicker(
       {Key key,
       this.onCancel,
+      this.initialIndex = 0,
       this.onConfirm,
       this.startText = "Start",
+      this.labelStyle = const TextStyle(fontSize: 12, color: Colors.black),
       this.endText = "End",
       this.doneText = "Done",
       this.cancelText = "Cancel",
@@ -95,25 +99,31 @@ class DateTimeRangePicker {
 
     showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (
+          BuildContext context,
+        ) {
           return FractionallySizedBox(
             widthFactor: 0.8,
             heightFactor: 0.5,
-            child: PickerWidget([
-              Tab(text: startText),
-              Tab(text: endText),
-            ],
-                initialStartTime,
-                initialEndTime,
-                interval,
-                this.onCancel,
-                this.onConfirm,
-                pickerMode,
-                this.doneText,
-                this.cancelText,
-                this.minimumTime,
-                this.maximumTime,
-                this.use24hFormat),
+            child: PickerWidget(
+              [
+                Tab(text: startText),
+                Tab(text: endText),
+              ],
+              initialStartTime,
+              initialEndTime,
+              interval,
+              this.onCancel,
+              this.onConfirm,
+              pickerMode,
+              this.doneText,
+              this.cancelText,
+              this.minimumTime,
+              this.maximumTime,
+              this.use24hFormat,
+              initialIndex: initialIndex,
+              labelStyle: labelStyle,
+            ),
           );
         });
   }
@@ -124,7 +134,7 @@ class PickerWidget extends StatefulWidget {
   final int _interval;
   final VoidCallback _onCancel;
   final PickerConfirmCallback _onConfirm;
-
+  final TextStyle labelStyle;
   final DateTime _initStart;
   final DateTime _initEnd;
   final CupertinoDatePickerMode _mode;
@@ -134,6 +144,7 @@ class PickerWidget extends StatefulWidget {
   final DateTime _minimumTime;
   final DateTime _maximumTime;
   final bool _use24hFormat;
+  final int initialIndex;
 
   PickerWidget(
       this._tabs,
@@ -148,7 +159,9 @@ class PickerWidget extends StatefulWidget {
       this._minimumTime,
       this._maximumTime,
       this._use24hFormat,
-      {Key key})
+      {Key key,
+      @required this.initialIndex,
+      @required this.labelStyle})
       : super(key: key);
 
   _PickerWidgetState createState() => _PickerWidgetState();
@@ -166,7 +179,10 @@ class _PickerWidgetState extends State<PickerWidget>
     _start = widget._initStart;
     _end = widget._initEnd;
 
-    _tabController = TabController(vsync: this, length: widget._tabs.length);
+    _tabController = TabController(
+        initialIndex: widget.initialIndex,
+        vsync: this,
+        length: widget._tabs.length);
   }
 
   @override
@@ -184,6 +200,7 @@ class _PickerWidgetState extends State<PickerWidget>
           backgroundColor: Colors.white,
           title: Container(
             child: TabBar(
+              labelStyle: widget.labelStyle,
               controller: _tabController,
               tabs: widget._tabs,
               labelColor: Theme.of(context).primaryColor,
